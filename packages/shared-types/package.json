@@ -1,0 +1,19 @@
+{
+  "name": "@betxpr/shared-types",
+  "version": "1.0.0",
+  "description": "Shared types and DTOs for BetXPR backend services",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
+  "dependencies": {
+    "@nestjs/common": "^10.0.0",
+    "class-validator": "^0.14.0",
+    "class-transformer": "^0.5.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

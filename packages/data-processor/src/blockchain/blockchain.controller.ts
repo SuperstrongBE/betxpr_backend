@@ -3,6 +3,7 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { Cron } from '@nestjs/schedule';
 import { BlockchainService } from './blockchain.service';
 import { QueueService } from '../queue/queue.service';
+import { BlockchainEventDto, EthereumEventDto, XPREventDto } from '@betxpr/shared-types';
 
 @Controller()
 export class BlockchainController {
@@ -14,8 +15,8 @@ export class BlockchainController {
   ) {}
 
   @MessagePattern('blockchain_event')
-  async handleBlockchainEvent(@Payload() event: any) {
-    this.logger.debug(`Received blockchain event: ${event.transactionHash}`);
+  async handleBlockchainEvent(@Payload() event: BlockchainEventDto) {
+    this.logger.debug(`Received blockchain event: ${event.transactionHash} from ${event.network}`);
     return this.queueService.addEvent(event);
   }
 

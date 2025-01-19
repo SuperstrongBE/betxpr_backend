@@ -2,6 +2,7 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ClientProxy, ClientProxyFactory, Transport } from '@nestjs/microservices';
 import { JsonRpc } from '@proton/js';
+import { XPREventDto, BlockchainNetwork } from '@betxpr/shared-types';
 
 @Injectable()
 export class BlockchainService implements OnModuleInit {
@@ -33,14 +34,17 @@ export class BlockchainService implements OnModuleInit {
         const actions = await this.rpc.history_get_actions(contractAccount);
         
         for (const action of actions.actions) {
-          const formattedEvent = {
-            eventName: action.action_trace.act.name,
-            args: action.action_trace.act.data,
-            blockNumber: action.block_num,
-            transactionHash: action.action_trace.trx_id,
-            timestamp: new Date(action.block_time),
-            network: 'xpr',
-          };
+          const formattedEvent = new XPREventDto();
+          formattedEvent.eventName = action.action_trace.act.name;
+          formattedEvent.args = action.action_trace.act.data;
+          formattedEvent.blockNumber = action.block_num;
+          formattedEvent.transactionHash = action.action_trace.trx_id;
+          formattedEvent.timestamp = new Date(action.block_time);
+          formattedEvent.network = BlockchainNetwork.XPR;
+          formattedEvent.contractAccount = action.action_trace.act.account;
+          formattedEvent.actionName = action.action_trace.act.name;
+          formattedEvent.authorization = action.action_trace.act.authorization;
+          formattedEvent.globalSequence = action.action_trace.global_sequence;
 
           await this.client.emit('blockchain_event', formattedEvent);
         }

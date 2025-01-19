@@ -22,10 +22,10 @@ services:
 
   data-processor:
     build:
-      context: ./data-processor
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./packages/data-processor/Dockerfile
     env_file:
-      - ./data-processor/.env
+      - ./packages/data-processor/.env
     depends_on:
       - postgres
     ports:
@@ -33,10 +33,10 @@ services:
 
   eth-listener:
     build:
-      context: ./eth-listener
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./packages/eth-listener/Dockerfile
     env_file:
-      - ./eth-listener/.env
+      - ./packages/eth-listener/.env
     depends_on:
       - data-processor
     ports:
@@ -44,10 +44,10 @@ services:
 
   xpr-listener:
     build:
-      context: ./xpr-listener
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./packages/xpr-listener/Dockerfile
     env_file:
-      - ./xpr-listener/.env
+      - ./packages/xpr-listener/.env
     depends_on:
       - data-processor
     ports:

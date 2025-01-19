@@ -2,6 +2,7 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ethers } from 'ethers';
 import { ClientProxy, ClientProxyFactory, Transport } from '@nestjs/microservices';
+import { EthereumEventDto, BlockchainNetwork } from '@betxpr/shared-types';
 
 @Injectable()
 export class BlockchainService implements OnModuleInit {
@@ -37,14 +38,17 @@ export class BlockchainService implements OnModuleInit {
     );
 
     contract.on('*', async (event) => {
-      const formattedEvent = {
-        eventName: event.event,
-        args: event.args,
-        blockNumber: event.blockNumber,
-        transactionHash: event.transactionHash,
-        timestamp: new Date(),
-        network: 'ethereum',
-      };
+      const block = await this.provider.getBlock(event.blockNumber);
+      const formattedEvent = new EthereumEventDto();
+      formattedEvent.eventName = event.event;
+      formattedEvent.args = event.args;
+      formattedEvent.blockNumber = event.blockNumber;
+      formattedEvent.transactionHash = event.transactionHash;
+      formattedEvent.timestamp = new Date(block.timestamp * 1000);
+      formattedEvent.network = BlockchainNetwork.ETHEREUM;
+      formattedEvent.contractAddress = event.address;
+      formattedEvent.logIndex = event.logIndex;
+      formattedEvent.blockHash = event.blockHash;
 
       await this.client.emit('blockchain_event', formattedEvent);
     });
