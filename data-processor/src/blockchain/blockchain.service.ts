@@ -6,6 +6,7 @@ import { createClient } from '@supabase/supabase-js';
 import { ConfigService } from '@nestjs/config';
 import { Timeout, CircuitBreaker } from '@nestjs/terminus';
 import Redis from 'ioredis';
+import { MetricsService } from '../metrics/metrics.service';
 
 @Injectable()
 export class BlockchainService {
@@ -18,6 +19,7 @@ export class BlockchainService {
     @InjectRepository(BlockchainEvent)
     private eventRepository: Repository<BlockchainEvent>,
     private configService: ConfigService,
+    private metricsService: MetricsService,
   ) {
     this.supabase = createClient(
       this.configService.get<string>('SUPABASE_URL'),
@@ -69,14 +71,21 @@ export class BlockchainService {
       // Try to save to Supabase with circuit breaker
       try {
         await this.saveToSupabase(event);
+        this.metricsService.setCircuitBreakerState('closed');
       } catch (error) {
         this.logger.error('Failed to save to Supabase (circuit breaker may be open):', error);
         // Store failed events in Redis for retry
         await this.redis.lpush('failed_events', JSON.stringify(event));
+        this.metricsService.setCircuitBreakerState('open');
       }
 
       // Mark event as processed
       await this.redis.set(eventKey, '1', 'EX', 86400); // Expire after 24 hours
+
+      // Update metrics
+      this.metricsService.incrementEventsProcessed(event.network);
+      const queueSize = await this.redis.llen('failed_events');
+      this.metricsService.setQueueSize(queueSize);
 
       return savedEvent;
     } catch (error) {
