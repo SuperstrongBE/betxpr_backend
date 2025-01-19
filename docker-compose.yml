@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  data-processor:
+    build:
+      context: ./data-processor
+      dockerfile: Dockerfile
+    env_file:
+      - ./data-processor/.env
+    depends_on:
+      - postgres
+    ports:
+      - "3002:3002"
+
+  eth-listener:
+    build:
+      context: ./eth-listener
+      dockerfile: Dockerfile
+    env_file:
+      - ./eth-listener/.env
+    depends_on:
+      - data-processor
+    ports:
+      - "3001:3001"
+
+  xpr-listener:
+    build:
+      context: ./xpr-listener
+      dockerfile: Dockerfile
+    env_file:
+      - ./xpr-listener/.env
+    depends_on:
+      - data-processor
+    ports:
+      - "3003:3003"
+
+volumes:
+  postgres_data:

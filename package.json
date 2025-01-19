@@ -1,0 +1,14 @@
+{
+  "name": "betxpr_backend",
+  "version": "1.0.0",
+  "description": "Backend services for betxpr project",
+  "scripts": {
+    "install:all": "cd eth-listener && npm install && cd ../xpr-listener && npm install && cd ../data-processor && npm install",
+    "build:all": "cd eth-listener && npm run build && cd ../xpr-listener && npm run build && cd ../data-processor && npm run build",
+    "start:dev": "docker-compose up --build",
+    "start:prod": "docker-compose up -d --build",
+    "stop": "docker-compose down",
+    "logs": "docker-compose logs -f",
+    "clean": "docker-compose down -v"
+  }
+}
