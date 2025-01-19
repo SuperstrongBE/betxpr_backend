@@ -9,17 +9,6 @@ services:
       - redis_data:/data
     command: redis-server --appendonly yes
 
-  postgres:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_USER: ${DB_USERNAME}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
   data-processor:
     build:
       context: .
@@ -27,7 +16,7 @@ services:
     env_file:
       - ./apps/data-processor/.env
     depends_on:
-      - postgres
+      - redis
     ports:
       - "3002:3002"
 
@@ -81,7 +70,6 @@ services:
       - prometheus
 
 volumes:
-  postgres_data:
   redis_data:
   prometheus_data:
   grafana_data:

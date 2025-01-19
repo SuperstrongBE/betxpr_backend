@@ -65,10 +65,7 @@ export class BlockchainService {
         return;
       }
 
-      // Save to PostgreSQL via TypeORM
-      const savedEvent = await this.eventRepository.save(event);
-
-      // Try to save to Supabase with circuit breaker
+      // Save to Supabase with circuit breaker
       try {
         await this.saveToSupabase(event);
         this.metricsService.setCircuitBreakerState('closed');
@@ -77,6 +74,7 @@ export class BlockchainService {
         // Store failed events in Redis for retry
         await this.redis.lpush('failed_events', JSON.stringify(event));
         this.metricsService.setCircuitBreakerState('open');
+        throw error;
       }
 
       // Mark event as processed
