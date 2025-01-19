@@ -23,9 +23,9 @@ services:
   data-processor:
     build:
       context: .
-      dockerfile: ./data-processor/Dockerfile
+      dockerfile: ./apps/data-processor/Dockerfile
     env_file:
-      - ./data-processor/.env
+      - ./apps/data-processor/.env
     depends_on:
       - postgres
     ports:
@@ -34,9 +34,9 @@ services:
   eth-listener:
     build:
       context: .
-      dockerfile: ./eth-listener/Dockerfile
+      dockerfile: ./apps/eth-listener/Dockerfile
     env_file:
-      - ./eth-listener/.env
+      - ./apps/eth-listener/.env
     depends_on:
       - data-processor
     ports:
@@ -45,9 +45,9 @@ services:
   xpr-listener:
     build:
       context: .
-      dockerfile: ./xpr-listener/Dockerfile
+      dockerfile: ./apps/xpr-listener/Dockerfile
     env_file:
-      - ./xpr-listener/.env
+      - ./apps/xpr-listener/.env
     depends_on:
       - data-processor
     ports:
