@@ -6,11 +6,11 @@ import { EthereumEventDto, BlockchainNetwork } from '@betxpr/shared-types';
 
 @Injectable()
 export class BlockchainService implements OnModuleInit {
-  private provider: ethers.providers.JsonRpcProvider;
+  private provider: ethers.JsonRpcProvider;
   private client: ClientProxy;
 
   constructor(private configService: ConfigService) {
-    this.provider = new ethers.providers.JsonRpcProvider(
+    this.provider = new ethers.JsonRpcProvider(
       this.configService.get<string>('ETH_RPC_URL'),
     );
 
