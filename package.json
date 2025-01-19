@@ -4,10 +4,15 @@
   "description": "Backend services for betxpr project",
   "private": true,
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "eth-listener",
+    "xpr-listener",
+    "data-processor"
   ],
   "scripts": {
-    "build:all": "npm run build --workspaces",
+    "build:shared": "cd packages/shared-types && npm run build",
+    "build:services": "cd eth-listener && npm run build && cd ../xpr-listener && npm run build && cd ../data-processor && npm run build",
+    "build": "npm run build:shared && npm run build:services",
     "start:dev": "docker-compose up --build",
     "start:prod": "docker-compose up -d --build",
     "stop": "docker-compose down",
