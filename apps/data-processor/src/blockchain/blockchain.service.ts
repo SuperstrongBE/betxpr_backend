@@ -4,7 +4,8 @@ import { Repository } from 'typeorm';
 import { BlockchainEvent } from './blockchain.entity';
 import { createClient } from '@supabase/supabase-js';
 import { ConfigService } from '@nestjs/config';
-import { Timeout, CircuitBreaker } from '@nestjs/terminus';
+import { Timeout } from '@nestjs/schedule';
+import { CircuitBreaker } from 'opossum';
 import Redis from 'ioredis';
 import { MetricsService } from '../metrics/metrics.service';
 
@@ -31,16 +32,16 @@ export class BlockchainService {
       port: this.configService.get('REDIS_PORT', 6379),
     });
 
-    this.circuitBreaker = new CircuitBreaker({
+    this.circuitBreaker = new CircuitBreaker(async (fn) => fn(), {
       resetTimeout: 10000, // 10 seconds
-      errorThreshold: 5,   // Number of errors before opening
+      errorThresholdPercentage: 50,   // Percentage of errors before opening
       timeout: 5000,       // 5 seconds timeout for operations
     });
   }
 
   @Timeout(5000)
   private async saveToSupabase(event: any) {
-    return this.circuitBreaker.call(async () => {
+    const action = async () => {
       const { data, error } = await this.supabase
         .from('blockchain_events')
         .insert([event]);
@@ -51,7 +52,9 @@ export class BlockchainService {
       }
 
       return data;
-    });
+    };
+
+    return this.circuitBreaker.fire(action);
   }
 
   async processEvent(event: any) {
@@ -85,7 +88,7 @@ export class BlockchainService {
       const queueSize = await this.redis.llen('failed_events');
       this.metricsService.setQueueSize(queueSize);
 
-      return savedEvent;
+      return event;
     } catch (error) {
       this.logger.error('Error processing blockchain event:', error);
       throw error;

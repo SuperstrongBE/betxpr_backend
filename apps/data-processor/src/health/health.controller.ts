@@ -32,7 +32,7 @@ export class HealthController {
       () => this.disk.checkStorage('disk', { thresholdPercent: 0.9, path: '/' }),
       () => ({
         queueStatus: {
-          status: queueStatus.failed > 100 ? 'error' : 'ok',
+          status: queueStatus.failed > 100 ? 'down' : 'up',
           details: queueStatus,
         },
       }),
