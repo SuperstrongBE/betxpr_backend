@@ -11,11 +11,13 @@
     "build:shared": "cd packages/shared-types && npm run build",
     "build:services": "cd apps/eth-listener && npm run build && cd ../xpr-listener && npm run build && cd ../data-processor && npm run build",
     "build": "npm run build:shared && npm run build:services",
-    "start:dev": "docker-compose up --build",
+    "start:dev": "./start-dev.sh",
     "start:prod": "docker-compose up -d --build",
+    "start:infra": "docker-compose -f docker-compose.infra.yml up -d",
+    "stop:infra": "docker-compose -f docker-compose.infra.yml down",
     "stop": "docker-compose down",
     "logs": "docker-compose logs -f",
-    "clean": "docker-compose down -v"
+    "clean": "docker-compose down -v && docker-compose -f docker-compose.infra.yml down -v"
   },
   "dependencies": {
     "@nestjs/schedule": "^5.0.0",
